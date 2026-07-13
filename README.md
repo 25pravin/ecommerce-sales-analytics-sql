@@ -2,7 +2,7 @@
 
 SQL-driven analysis of **96,470 delivered orders** and **R$15.4M in revenue** from the Olist Brazilian e-commerce marketplace, spanning **Sept 2016 – Aug 2018 (23 months / ~2 years)** of transaction history. Built end-to-end with SQLite, pandas, and 19 analytical queries covering revenue trends, customer retention, delivery performance, and seller concentration — presented as an interactive dashboard.
 
-**[▶ View Interactive Dashboard](https://25pravin.github.io/-ecommerce-sales-rfm-analysis/Dashboard.html)** | **[View all 19 SQL queries](https://25pravin.github.io/-ecommerce-sales-rfm-analysis/sql_queriesnb.html)**
+**[▶ View Interactive Dashboard](https://25pravin.github.io/ecommerce-sales-analytics-sql/Dashboard.html)** | **[View all 19 SQL queries](https://25pravin.github.io/ecommerce-sales-analytics-sql/sql_queriesnb.html)**
 
 ---
 
