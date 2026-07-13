@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olist E-Commerce Sales Analytics — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root{
+    --bg:#0F1115;
+    --panel:#171A21;
+    --panel-alt:#1C2029;
+    --border:#282D38;
+    --text:#ECEDF1;
+    --muted:#8B90A0;
+    --amber:#E3A73A;
+    --amber-dim:#B98226;
+    --teal:#4FC1B0;
+    --coral:#E15B4F;
+    --violet:#8B7FD1;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 80px;}
+
+  /* HERO */
+  .hero{
+    border-bottom:1px solid var(--border);
+    padding:56px 0 40px;
+    margin-bottom:48px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.08em;
+    color:var(--amber);
+    text-transform:uppercase;
+    margin:0 0 14px;
+  }
+  .hero h1{
+    font-size:34px;
+    font-weight:600;
+    margin:0 0 12px;
+    letter-spacing:-.01em;
+  }
+  .hero p.sub{
+    color:var(--muted);
+    font-size:16px;
+    max-width:680px;
+    margin:0 0 32px;
+  }
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .kpi{
+    background:var(--panel);
+    padding:20px 20px 18px;
+  }
+  .kpi .label{font-size:12px;color:var(--muted);margin:0 0 8px;}
+  .kpi .value{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:26px;
+    font-weight:500;
+    font-variant-numeric:tabular-nums;
+    color:var(--text);
+  }
+  .kpi .value.amber{color:var(--amber);}
+
+  /* SECTIONS */
+  section{margin-bottom:56px;}
+  .sec-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:6px;
+  }
+  .qtag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--amber-dim);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:2px 7px;
+    white-space:nowrap;
+  }
+  .sec-head h2{
+    font-size:19px;
+    font-weight:600;
+    margin:0;
+  }
+  .sec-desc{
+    color:var(--muted);
+    font-size:14px;
+    margin:0 0 20px;
+    max-width:720px;
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:24px;
+  }
+  .grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .stat-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+  }
+  .stat-card .n{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:30px;
+    font-weight:500;
+    color:var(--teal);
+  }
+  .stat-card .n.coral{color:var(--coral);}
+  .stat-card .n.amber{color:var(--amber);}
+  .stat-card .l{font-size:13px;color:var(--muted);margin-top:6px;}
+  .stat-card .d{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5;border-top:1px solid var(--border);padding-top:10px;}
+
+  .chart-box{position:relative;width:100%;}
+  .legend{
+    display:flex;flex-wrap:wrap;gap:16px;
+    font-size:12.5px;color:var(--muted);margin-bottom:14px;
+  }
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block;}
+
+  .insight{
+    margin-top:16px;
+    padding:14px 16px;
+    background:var(--panel-alt);
+    border-left:2px solid var(--amber);
+    border-radius:0 6px 6px 0;
+    font-size:13.5px;
+    color:var(--muted);
+  }
+  .insight b{color:var(--text);font-weight:600;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{
+    text-align:left;color:var(--muted);font-weight:500;
+    font-size:12px;text-transform:uppercase;letter-spacing:.03em;
+    padding:8px 10px;border-bottom:1px solid var(--border);
+  }
+  td{padding:9px 10px;border-bottom:1px solid var(--border);}
+  td.num,th.num{text-align:right;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  tr:last-child td{border-bottom:none;}
+
+  .tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .tech-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+  .tech-card h3{font-size:14px;margin:0 0 8px;color:var(--amber);}
+  .tech-card p{font-size:13px;color:var(--muted);margin:0;line-height:1.6;}
+
+  footer{
+    border-top:1px solid var(--border);
+    padding-top:24px;
+    color:var(--muted);
+    font-size:12.5px;
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+
+  @media (max-width:820px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .grid-2,.grid-3,.tech-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <p class="eyebrow">SQL analytics · SQLite + Python</p>
+    <h1>Olist e-commerce sales analytics</h1>
+    <p class="sub">19 SQL queries against 96,470 delivered orders from the Olist Brazilian marketplace, covering Sept 2016 – Aug 2018 (23 months). Every figure below comes directly from query output — nothing is estimated.</p>
+    <div class="kpi-row">
+      <div class="kpi"><p class="label">Total revenue</p><p class="value amber">R$15.42M</p></div>
+      <div class="kpi"><p class="label">Delivered orders</p><p class="value">96,470</p></div>
+      <div class="kpi"><p class="label">Unique customers</p><p class="value">93,350</p></div>
+      <div class="kpi"><p class="label">Avg. order value</p><p class="value">R$159.83</p></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="qtag">Q02 · Q09 · Q10</span><h2>Revenue trajectory</h2></div>
+    <p class="sec-desc">Monthly revenue with a 3-month moving average to smooth noise, plus the cumulative running total showing overall growth.</p>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="legend">
+          <span><span class="dot" style="background:#4FC1B0"></span>Monthly revenue</span>
+          <span><span class="dot" style="background:#E3A73A"></span>3-month moving avg</span>
+        </div>
+        <div class="chart-box" style="height:280px;">
+          <canvas id="revTrend" role="img" aria-label="Line chart of monthly revenue and 3-month moving average from September 2016 to August 2018, showing growth from near zero to over R$1.1 million per month by early 2018.">Monthly revenue grew from R$143 in Sept 2016 to a peak of R$1.15M in Nov 2017, stabilizing around R$1.0-1.1M per month through Aug 2018.</canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="legend"><span><span class="dot" style="background:#8B7FD1"></span>Cumulative revenue</span></div>
+        <div class="chart-box" style="height:280px;">
+          <canvas id="cumRev" role="img" aria-label="Area chart of cumulative revenue growing steadily from September 2016 to reach R$15.42 million by August 2018.">Cumulative revenue reached R$15.42M by August 2018, growing steadily from mid-2017 onward.</canvas>
+        </div>
+      </div>
+    </div>
+    <div class="insight"><b>Insight:</b> revenue scaled roughly 8x between Q1 2017 and its Nov 2017 peak (R$1.15M — a Black Friday-driven spike), then plateaued at ~R$1.0-1.1M/month through mid-2018, suggesting the platform reached a mature, stable growth phase rather than continued exponential growth.</div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="qtag">Q08</span><h2>Month-over-month growth</h2></div>
+    <p class="sec-desc">Growth rate computed with <code class="mono">LAG()</code>. The first four months (Sept 2016 – Jan 2017) are excluded from the chart — near-zero base volume during platform ramp-up produces distorted percentages (e.g. +32,306% in Oct 2016) that would compress the rest of the chart.</p>
+    <div class="panel">
+      <div class="chart-box" style="height:260px;">
+        <canvas id="momChart" role="img" aria-label="Bar chart of month-over-month revenue growth percentage from February 2017 to August 2018, fluctuating between roughly minus 27% and plus 113%, trending toward smaller swings over time.">Growth was volatile in 2017 (peaks of +112.8% Feb 2017, +53.5% Nov 2017) and stabilized to single-digit swings by mid-2018.</canvas>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="qtag">Q04 · Q15 · Q19</span><h2>Delivery performance & satisfaction</h2></div>
+    <p class="sec-desc">On-time vs. late delivery outcomes, the full distribution of delivery times by decile, and the measured correlation with review scores.</p>
+    <div class="grid-2">
+      <div class="panel">
+        <div class="legend">
+          <span><span class="dot" style="background:#4FC1B0"></span>On-time</span>
+          <span><span class="dot" style="background:#E15B4F"></span>Late</span>
+        </div>
+        <div class="chart-box" style="height:240px;">
+          <canvas id="deliveryChart" role="img" aria-label="Bar chart comparing on-time orders, 88163 with an average review score of 4.29, versus late orders, 7661 with an average review score of 2.57.">On-time orders: 88,163 (avg review 4.29). Late orders: 7,661 (avg review 2.57).</canvas>
+        </div>
+      </div>
+      <div class="stat-card" style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="n coral">−0.334</div>
+        <div class="l">Correlation: delivery days ↔ review score (Q19)</div>
+        <div class="d">A moderate negative correlation — as delivery takes longer, satisfaction measurably drops. Combined with the 1.72-point gap between on-time and late review scores, this quantifies delivery speed as a direct driver of customer satisfaction, not just an operational metric.</div>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:20px;">
+      <p class="sec-desc" style="margin-bottom:14px;">Delivery time deciles (Q15) — days from purchase to delivery, split into 10 equal-sized buckets. The gap between decile 9 and 10 (17.4 → 209.6 days) shows a long tail of severely delayed orders hidden by the platform-wide average.</p>
+      <div class="chart-box" style="height:260px;">
+        <canvas id="decileChart" role="img" aria-label="Bar chart of delivery day ranges across 10 deciles, from 0.5 to 4.2 days in decile 1 up to 23.1 to 209.6 days in decile 10.">Delivery day ranges per decile, from 0.5-4.2 days (fastest 10%) to 23.1-209.6 days (slowest 10%).</canvas>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="qtag">Q03 · Q11 · Q12</span><h2>Customer retention & concentration</h2></div>
+    <p class="sec-desc">Retention is the weakest link in the funnel — these three metrics quantify exactly where and how much.</p>
+    <div class="grid-3">
+      <div class="stat-card">
+        <div class="n coral">3.0%</div>
+        <div class="l">Repeat customer rate</div>
+        <div class="d">Only 3 in 100 customers place a second order. Highest-leverage retention opportunity in the dataset.</div>
+      </div>
+      <div class="stat-card">
+        <div class="n amber">46.71%</div>
+        <div class="l">Revenue from top 15% of customers</div>
+        <div class="d">Pareto-style concentration (Q11) — a disproportionate share of revenue comes from a small, valuable customer segment.</div>
+      </div>
+      <div class="stat-card">
+        <div class="n">81.2 days</div>
+        <div class="l">Avg. gap between 1st and 2nd purchase</div>
+        <div class="d">The natural window for a win-back campaign (Q12) — re-engagement should target customers around day 60-80 post-purchase.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="qtag">Q05</span><h2>Revenue by state</h2></div>
+    <p class="sec-desc">Top 10 of 27 Brazilian states by revenue (<code class="mono">DENSE_RANK()</code>). São Paulo alone accounts for 37% of total platform revenue.</p>
+    <div class="panel">
+      <div class="chart-box" style="height:360px;">
+        <canvas id="stateChart" role="img" aria-label="Horizontal bar chart of revenue by top 10 Brazilian states, led by Sao Paulo at 5.77 million reais, followed by Rio de Janeiro at 2.06 million and Minas Gerais at 1.82 million.">Top state: São Paulo R$5.77M, then Rio de Janeiro R$2.06M, Minas Gerais R$1.82M, Rio Grande do Sul R$0.86M, Paraná R$0.78M.</canvas>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid-2" style="align-items:start;">
+    <section>
+      <div class="sec-head"><span class="qtag">Q06 · Q13</span><h2>Seller landscape</h2></div>
+      <p class="sec-desc">Top 10 sellers by revenue. Despite this spread, the top 10 sellers represent only <b style="color:var(--text)">13.27%</b> of total platform revenue (Q13, <code class="mono">RANK()</code>) — a healthily diversified seller base, not a single-point-of-failure risk.</p>
+      <div class="panel">
+        <div class="chart-box" style="height:340px;">
+          <canvas id="sellerChart" role="img" aria-label="Horizontal bar chart of top 10 sellers by revenue, ranging from about R$132,000 to R$227,000 each.">Top seller: R$226,988 across 1,124 orders. Ranks 2-10 range from R$131,837 to R$217,940.</canvas>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="sec-head"><span class="qtag">Q07</span><h2>Payment mix</h2></div>
+      <p class="sec-desc">Credit card dominates by value; boleto (Brazilian bank slip) is the clear second channel.</p>
+      <div class="panel">
+        <div class="legend" id="payLegend"></div>
+        <div class="chart-box" style="height:260px;">
+          <canvas id="payChart" role="img" aria-label="Donut chart of payment method mix by total value, credit card 76.2%, boleto 17.4%, voucher 2.3%, debit card 1.3%.">Credit card: R$12.54M (76.2%). Boleto: R$2.87M (17.4%). Voucher: R$0.38M (2.3%). Debit card: R$0.22M (1.3%).</canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section>
+    <div class="sec-head"><span class="qtag">SQL techniques</span><h2>What this project demonstrates</h2></div>
+    <div class="tech-grid">
+      <div class="tech-card"><h3>Window functions</h3><p><code class="mono">LAG</code>, <code class="mono">RANK</code>, <code class="mono">DENSE_RANK</code>, <code class="mono">NTILE</code>, <code class="mono">ROW_NUMBER</code>, and a 3-row moving average with <code class="mono">ROWS BETWEEN</code>.</p></div>
+      <div class="tech-card"><h3>Correlated subqueries</h3><p>Per-customer installment comparison (Q16) — inner query re-evaluates against each outer row.</p></div>
+      <div class="tech-card"><h3>Data cleaning</h3><p>Deduplicated late-arriving review records via partitioned <code class="mono">ROW_NUMBER()</code> before joining into the fact table.</p></div>
+      <div class="tech-card"><h3>Reusable views</h3><p><code class="mono">fact_orders</code> and <code class="mono">vw_monthly_kpis</code> act as a single source of truth for every downstream query and this dashboard.</p></div>
+      <div class="tech-card"><h3>Performance tuning</h3><p>Added indexes on join/filter columns and verified index usage with <code class="mono">EXPLAIN QUERY PLAN</code> (Q18).</p></div>
+      <div class="tech-card"><h3>Statistical analysis</h3><p>Pearson correlation (delivery days vs. review score) computed in pandas from raw query output.</p></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Dataset: Olist Brazilian E-Commerce Public Dataset · Sept 2016 – Aug 2018</span>
+    <span>Built with SQLite · Python (pandas) · Chart.js</span>
+  </footer>
+
+</div>
+
+<script>
+const ink = { grid:'#242A35', tick:'#8B90A0', font:"'IBM Plex Mono', monospace" };
+Chart.defaults.color = ink.tick;
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+
+function fmtR$(v){ return 'R$' + Number(v).toLocaleString('en-US', {maximumFractionDigits:0}); }
+
+// ---- Q2/Q10: monthly revenue + 3mo moving avg ----
+const months = ['2016-09','2016-10','2016-12','2017-01','2017-02','2017-03','2017-04','2017-05','2017-06','2017-07','2017-08','2017-09','2017-10','2017-11','2017-12','2018-01','2018-02','2018-03','2018-04','2018-05','2018-06','2018-07','2018-08'];
+const monthlyRevenue = [143.46,46490.66,19.62,127482.37,271239.32,414330.95,390812.40,566657.40,490050.37,566299.08,645832.36,701077.49,751117.01,1153229.37,843078.29,1077887.46,966168.41,1120598.24,1132878.93,1128774.52,1011448.96,1027286.52,985491.64];
+const movingAvg3mo = [143.46,23317.06,15551.25,57997.55,132913.77,271017.55,358794.22,457266.92,482506.72,541002.28,567393.94,637736.31,699342.29,868474.62,915808.22,1024731.71,962378.05,1054884.70,1073215.19,1127417.23,1091034.14,1055836.67,1008075.71];
+const cumulativeRevenue = [143.46,46634.12,46653.74,174136.11,445375.43,859706.38,1250518.78,1817176.18,2307226.55,2873525.63,3519357.99,4220435.48,4971552.49,6124781.86,6967860.15,8045747.61,9011916.02,10132514.26,11265393.19,12394167.71,13405616.67,14432903.19,15418394.83];
+
+new Chart(document.getElementById('revTrend'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Monthly revenue', data: monthlyRevenue, borderColor:'#4FC1B0', backgroundColor:'transparent', borderWidth:2, pointRadius:0, tension:0.25 },
+    { label:'3-mo moving avg', data: movingAvg3mo, borderColor:'#E3A73A', backgroundColor:'transparent', borderWidth:2, borderDash:[4,3], pointRadius:0, tension:0.25 }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> c.dataset.label+': '+fmtR$(c.raw)}} },
+    scales:{ x:{grid:{display:false},ticks:{maxRotation:60,minRotation:60,autoSkip:true,maxTicksLimit:12}}, y:{grid:{color:ink.grid},ticks:{callback:(v)=>'R$'+(v/1000)+'k'}} } }
+});
+
+new Chart(document.getElementById('cumRev'), {
+  type: 'line',
+  data: { labels: months, datasets: [
+    { label:'Cumulative revenue', data: cumulativeRevenue, borderColor:'#8B7FD1', backgroundColor:'rgba(139,127,209,0.12)', fill:true, borderWidth:2, pointRadius:0, tension:0.2 }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> fmtR$(c.raw)}} },
+    scales:{ x:{grid:{display:false},ticks:{maxRotation:60,minRotation:60,autoSkip:true,maxTicksLimit:12}}, y:{grid:{color:ink.grid},ticks:{callback:(v)=>'R$'+(v/1e6).toFixed(1)+'M'}} } }
+});
+
+// ---- Q8: MoM growth (from Feb 2017 onward to avoid low-base distortion) ----
+const momMonths = ['2017-02','2017-03','2017-04','2017-05','2017-06','2017-07','2017-08','2017-09','2017-10','2017-11','2017-12','2018-01','2018-02','2018-03','2018-04','2018-05','2018-06','2018-07','2018-08'];
+const momGrowth = [112.77,52.75,-5.68,44.99,-13.52,15.56,14.04,8.55,7.14,53.54,-26.89,27.85,-10.36,15.98,1.10,-0.36,-10.39,1.57,-4.07];
+new Chart(document.getElementById('momChart'), {
+  type:'bar',
+  data:{ labels: momMonths, datasets:[{ data: momGrowth,
+    backgroundColor: momGrowth.map(v => v>=0 ? '#4FC1B0' : '#E15B4F'), borderRadius:3, maxBarThickness:26 }]},
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> (c.raw>=0?'+':'')+c.raw+'%'}} },
+    scales:{ x:{grid:{display:false},ticks:{maxRotation:60,minRotation:60,autoSkip:false}}, y:{grid:{color:ink.grid},ticks:{callback:(v)=>v+'%'}} } }
+});
+
+// ---- Q4: delivery status ----
+new Chart(document.getElementById('deliveryChart'), {
+  type:'bar',
+  data:{ labels:['On-time','Late'], datasets:[
+    { label:'Orders', data:[88163,7661], backgroundColor:['#4FC1B0','#E15B4F'], borderRadius:4, maxBarThickness:70 }
+  ]},
+  options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> c.raw.toLocaleString()+' orders'}} },
+    scales:{ x:{grid:{color:ink.grid},ticks:{callback:(v)=> (v/1000)+'k'}}, y:{grid:{display:false}} } }
+});
+
+// ---- Q15: delivery deciles ----
+const decLabels = ['D1','D2','D3','D4','D5','D6','D7','D8','D9','D10'];
+const decMin = [0.5,4.2,6.0,7.3,8.7,10.2,12.1,14.2,17.4,23.1];
+const decMax = [4.2,6.0,7.3,8.7,10.2,12.1,14.2,17.4,23.1,209.6];
+new Chart(document.getElementById('decileChart'), {
+  type:'bar',
+  data:{ labels: decLabels, datasets:[
+    { label:'Range (days)', data: decMin.map((mn,i)=> decMax[i]-mn), backgroundColor:'#E3A73A', borderRadius:3, maxBarThickness:36,
+      base: decMin }
+  ]},
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{ label:(c)=> decMin[c.dataIndex]+' – '+decMax[c.dataIndex]+' days' }} },
+    scales:{ x:{grid:{display:false}}, y:{grid:{color:ink.grid},ticks:{callback:(v)=>v+'d'}} } }
+});
+
+// ---- Q5: revenue by state (top 10) ----
+const stateLabels = ['SP','RJ','MG','RS','PR','SC','BA','DF','GO','ES'];
+const stateRevenue = [5768518.23,2055401.57,1818891.67,861278.79,781708.80,595127.78,591137.81,346123.35,334212.35,317657.93];
+new Chart(document.getElementById('stateChart'), {
+  type:'bar',
+  data:{ labels: stateLabels, datasets:[{ data: stateRevenue, backgroundColor:'#4FC1B0', borderRadius:4, maxBarThickness:22 }]},
+  options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> fmtR$(c.raw)}} },
+    scales:{ x:{grid:{color:ink.grid},ticks:{callback:(v)=>'R$'+(v/1e6).toFixed(1)+'M'}}, y:{grid:{display:false}} } }
+});
+
+// ---- Q6: top sellers ----
+const sellerLabels = ['#1 (SP)','#2 (BA)','#3 (SP)','#4 (SP)','#5 (SP)','#6 (SP)','#7 (SP)','#8 (SP)','#9 (SP)','#10 (SP)'];
+const sellerRevenue = [226987.93,217940.44,196882.12,190917.14,186570.05,165981.49,159816.87,139658.69,138208.56,131836.71];
+new Chart(document.getElementById('sellerChart'), {
+  type:'bar',
+  data:{ labels: sellerLabels, datasets:[{ data: sellerRevenue, backgroundColor:'#8B7FD1', borderRadius:4, maxBarThickness:22 }]},
+  options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> fmtR$(c.raw)}} },
+    scales:{ x:{grid:{color:ink.grid},ticks:{callback:(v)=>'R$'+(v/1000)+'k'}}, y:{grid:{display:false}} } }
+});
+
+// ---- Q7: payment mix ----
+const payLabels = ['Credit card','Boleto','Voucher','Debit card'];
+const payValues = [12542084.19,2869361.27,379436.87,217989.79];
+const payColors = ['#E3A73A','#4FC1B0','#8B7FD1','#E15B4F'];
+const payTotal = payValues.reduce((a,b)=>a+b,0);
+new Chart(document.getElementById('payChart'), {
+  type:'doughnut',
+  data:{ labels: payLabels, datasets:[{ data: payValues, backgroundColor: payColors, borderColor:'#171A21', borderWidth:2 }]},
+  options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=> fmtR$(c.raw)+' ('+(100*c.raw/payTotal).toFixed(1)+'%)'}} } }
+});
+document.getElementById('payLegend').innerHTML = payLabels.map((l,i)=>
+  `<span><span class="dot" style="background:${payColors[i]}"></span>${l} ${(100*payValues[i]/payTotal).toFixed(1)}%</span>`
+).join('');
+</script>
+</body>
+</html>
